@@ -4,6 +4,16 @@
 using std::cout;
 
 void TestMatrix();
+void TestPlus();
+void TestMinus();
+void TestMultiple();
+void TestSet();
+void TestPlusAndSet();
+void TestMinusAndSet();
+void TestMultipleAndSet();
+void TestEqual();
+void TestTransponent();
+void TestInmemoryTransponent();
 
 int main() {
 
@@ -18,14 +28,25 @@ void TestMatrix() {
 	m[{0, 1}] = 0;
 	m[{1, 0}] = 0;
 	m[{1, 1}] = 0;
-
-	cout << m;
-
+	cout << "First matrix\n" << m;
 	m.Assigne(2, 3, 1);
-
-	cout << m;
-
-	m.TransponentMatrix();
-
-	cout << m;
+	Matrix<int> m2(2, 3, 2);
+	cout << "Assigned first matrix\n" << m;
+	cout << "Second matrix\n" << m2;
+	Matrix<int> m3;
+	m3 = m + m2;
+	cout << "Summ of first matrix and second matrix\n" << m3;
+	m3 = m - m2;
+	cout << "Diff of first matrix and second matrix\n" << m3;
 }
+
+void TestPlus() {}
+void TestMinus() {}
+void TestMultiple() {}
+void TestSet() {}
+void TestPlusAndSet() {}
+void TestMinusAndSet() {}
+void TestMultipleAndSet() {}
+void TestEqual() {}
+void TestTransponent() {}
+void TestInmemoryTransponent() {}
