@@ -75,6 +75,12 @@ public:
         return columns;
     }
 
+    vector<T*>& operator[](size_t i) {
+        if (i < 0 || i >= rows)
+            throw runtime_error("Matrix subscript out of range");
+        return (*matrixLink)[i];
+    }
+
     T& operator[](pair<size_t, size_t> i) {
         if (i.first < 0 || i.first >= rows || i.second < 0 || i.second >= columns)
             throw runtime_error("Matrix subscript out of range");
@@ -98,7 +104,7 @@ public:
     Matrix<T>& operator* (Matrix<T>& otherMatrix) {
         if (!PossibleToMultiple(otherMatrix))
             throw runtime_error("The number of columns of the first matrix and number of rows of the second matrix must be equal");
-        return Multiple(otherMatrix);
+        return (*Multiple(otherMatrix));
     }
 
     Matrix<T>& operator= (Matrix<T>& other) {
@@ -111,24 +117,27 @@ public:
         return *this;
     }
 
-    Matrix<T>& operator+= (const Matrix<T>& other) {
+    Matrix<T>& operator+= (Matrix<T>& otherMatrix) {
+        *this = (*PlusOrMinus(otherMatrix));
         return *this;
     }
 
-    Matrix<T>& operator-= (const Matrix<T>& other) {
+    Matrix<T>& operator-= (Matrix<T>& otherMatrix) {
+        *this = (*PlusOrMinus(otherMatrix, true));
         return *this;
     }
 
-    Matrix<T>& operator*= (const Matrix<T>& other) {
+    Matrix<T>& operator*= (Matrix<T>& otherMatrix) {
+        *this = (*Multiple(otherMatrix));
         return *this;
     }
 
-    bool operator== (const Matrix<T>& other) {
-        if (rows != other.Rows() || columns != other.Columns())
+    bool operator== (Matrix<T>& otherMatrix) {
+        if (rows != otherMatrix.Rows() || columns != otherMatrix.Columns())
             return false;
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < columns; ++j) {
-                if (*(*matrixLink)[i][j] != other[i][j])
+                if (*(*matrixLink)[i][j] != otherMatrix[{i, j}])
                     return false;
             }
         }
@@ -189,11 +198,32 @@ private:
         return temp;
     }
 
-    Matrix<T> Multiple(Matrix<T>& otherMatrix) {
+    Matrix<T>* Multiple(Matrix<T>& otherMatrix) {
         Matrix<T>* temp;
         temp = new Matrix<T>();
-        temp->Resize(rows, columns, 0);
+        int newRows = rows;
+        int newColumns = otherMatrix.Columns();
+        temp->Resize(newRows, newColumns);
+
+        otherMatrix.TransponentMatrix();
+
+        for (int i = 0; i < newRows; ++i) {
+            for (int j = 0; j < newColumns; ++j) {
+                (*temp)[{i, j}] = MultipleTwoVectors((*matrixLink)[i], otherMatrix[j]);
+            }
+        }
+
+        otherMatrix.TransponentMatrix();
+
         return temp;
+    }
+
+    T MultipleTwoVectors(vector<T*>& firstVector, vector<T*>& secondVector) {
+        T res = 0;
+        for (int i = 0; i < firstVector.size(); ++i) {
+            res += (*firstVector[i]) * (*secondVector[i]);
+        }
+        return res;
     }
 
     void TransponentInMemory() {
@@ -201,7 +231,8 @@ private:
             for (int i = 0; i < columns - rows; ++i) {
                 realMatrix.push_back(vector<T>(columns, 0));
             }
-        } else {
+        }
+        else {
             for (int i = 0; i < rows; ++i) {
                 for (int j = columns; j < rows; ++j) {
                     realMatrix[i].push_back(0);
@@ -221,7 +252,8 @@ private:
                     realMatrix[i].pop_back();
                 }
             }
-        } else {
+        }
+        else {
             for (int i = 0; i < columns - rows; ++i) {
                 realMatrix.pop_back();
             }

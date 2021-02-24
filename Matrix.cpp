@@ -22,6 +22,7 @@ int main() {
 }
 
 void TestMatrix() {
+
 	Matrix<int> m;
 	m.Resize(2, 2);
 	m[{0, 0}] = 0;
@@ -38,6 +39,13 @@ void TestMatrix() {
 	cout << "Summ of first matrix and second matrix\n" << m3;
 	m3 = m - m2;
 	cout << "Diff of first matrix and second matrix\n" << m3;
+	cout << (m == m2 ? "true" : "false") << "\n";
+	Matrix<int> m4(3, 2, 1);
+	cout << "Forth matrix\n" << m4;
+	Matrix<int> m5;
+	m2 *= m4;
+	cout << "Multiple of second and forth matrixes\n" << m2;
+
 }
 
 void TestPlus() {}
