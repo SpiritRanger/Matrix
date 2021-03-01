@@ -42,6 +42,9 @@ void TestMatrix() {
 	cout << (m == m2 ? "true" : "false") << "\n";
 	Matrix<int> m4(3, 2, 1);
 	cout << "Forth matrix\n" << m4;
+	cout << "Nontransponented matrix\n" << m;
+	m.Transponent(true);
+	cout << "Transponented matrix\n" << m;
 	Matrix<int> m5;
 	m2 *= m4;
 	cout << "Multiple of second and forth matrixes\n" << m2;

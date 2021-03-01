@@ -58,7 +58,7 @@ public:
         ResizeWithValue(rows, columns, defaulv_value);
     }
 
-    void TransponentMatrix(bool inMemory = false) {
+    void Transponent(bool inMemory = false) {
         if (inMemory) {
             TransponentInMemory();
             return;
@@ -118,16 +118,22 @@ public:
     }
 
     Matrix<T>& operator+= (Matrix<T>& otherMatrix) {
-        *this = (*PlusOrMinus(otherMatrix));
+        if (!PossibleToPlusOrMinus(otherMatrix))
+            throw runtime_error("Both matrices must have the same size");
+        PlusOrMinusAndSetToFirst(*this, otherMatrix, false);
         return *this;
     }
 
     Matrix<T>& operator-= (Matrix<T>& otherMatrix) {
-        *this = (*PlusOrMinus(otherMatrix, true));
+        if (!PossibleToPlusOrMinus(otherMatrix))
+            throw runtime_error("Both matrices must have the same size");
+        PlusOrMinusAndSetToFirst(*this, otherMatrix, true);
         return *this;
     }
 
     Matrix<T>& operator*= (Matrix<T>& otherMatrix) {
+        if (!PossibleToMultiple(otherMatrix))
+            throw runtime_error("The number of columns of the first matrix and number of rows of the second matrix must be equal");
         *this = (*Multiple(otherMatrix));
         return *this;
     }
@@ -189,13 +195,17 @@ private:
     Matrix<T>* PlusOrMinus(Matrix<T>& otherMatrix, bool minus = false) {
         Matrix<T>* temp;
         temp = new Matrix<T>();
-        temp->Resize(rows, columns);
+        temp = this;
+        PlusOrMinusAndSetToFirst((*temp), otherMatrix, minus);
+        return temp;
+    }
+
+    void PlusOrMinusAndSetToFirst(Matrix<T>& firstMatrix, Matrix<T>& secondMatrix, bool minus) {
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < columns; ++j) {
-                (*temp)[{i, j}] = minus ? *(*matrixLink)[i][j] - otherMatrix[{i, j}] : *(*matrixLink)[i][j] + otherMatrix[{i, j}];
+                firstMatrix[{i, j}] = minus ? firstMatrix[{i, j}] - secondMatrix[{i, j}] : firstMatrix[{i, j}] + secondMatrix[{i, j}];
             }
         }
-        return temp;
     }
 
     Matrix<T>* Multiple(Matrix<T>& otherMatrix) {
@@ -205,7 +215,7 @@ private:
         int newColumns = otherMatrix.Columns();
         temp->Resize(newRows, newColumns);
 
-        otherMatrix.TransponentMatrix();
+        otherMatrix.Transponent();
 
         for (int i = 0; i < newRows; ++i) {
             for (int j = 0; j < newColumns; ++j) {
@@ -213,7 +223,7 @@ private:
             }
         }
 
-        otherMatrix.TransponentMatrix();
+        otherMatrix.Transponent();
 
         return temp;
     }
@@ -229,11 +239,11 @@ private:
     void TransponentInMemory() {
         if (rows < columns) {
             for (int i = 0; i < columns - rows; ++i) {
-                realMatrix.push_back(vector<T>(columns, 0));
+                realMatrix.push_back(vector<T>(rows, 0));
             }
         }
         else {
-            for (int i = 0; i < rows; ++i) {
+            for (int i = 0; i < columns; ++i) {
                 for (int j = columns; j < rows; ++j) {
                     realMatrix[i].push_back(0);
                 }
@@ -241,13 +251,13 @@ private:
         }
         int newColumns;
         int newRows = newColumns = max(rows, columns);
-        for (int i = 0; i < newRows; ++i) {
-            for (int j = i + 1; j < newColumns; ++j) {
+        for (int i = 0; i < realMatrix.size(); ++i) {
+            for (int j = i + 1; j < realMatrix[i].size(); ++j) {
                 swap(realMatrix[i][j], realMatrix[j][i]);
             }
         }
         if (rows < columns) {
-            for (int i = 0; i < rows; ++i) {
+            for (int i = 0; i < columns; ++i) {
                 for (int j = columns; j < rows; ++j) {
                     realMatrix[i].pop_back();
                 }
