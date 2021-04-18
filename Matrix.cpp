@@ -2,6 +2,7 @@
 #include "Matrix.h"
 
 using std::cout;
+using MatrixLib::Matrix;
 
 void TestMatrix();
 void TestPlus();
